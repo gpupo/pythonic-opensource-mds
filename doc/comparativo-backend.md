@@ -1,0 +1,15 @@
+# Quadro Comparativo de Ferramentas de Geração Automática de APIs e Backend-as-a-Service
+
+| Característica                                 | PostGraphile                            | Hasura                                  | Supabase                                | WunderGraph                              |
+|------------------------------------------------|------------------------------------------|------------------------------------------|------------------------------------------|-------------------------------------------|
+| **Linguagem principal**                        | TypeScript + Node.js                     | Haskell                                  | TypeScript + Go                          | TypeScript + Go                           |
+| **Tipo de API gerada**                         | GraphQL                                  | GraphQL                                  | REST e GraphQL                           | GraphQL, REST, OpenAPI                    |
+| **Geração de API a partir de...**              | PostgreSQL                               | PostgreSQL                               | PostgreSQL                               | Vários (PostgreSQL, REST, GraphQL, etc.)  |
+| **Realtime (WebSockets, Subscriptions)**       | Sim, via plugins                         | Sim, nativo com suporte a triggers       | Sim, nativo (Postgres + Realtime server) | Sim, com suporte a GraphQL live queries   |
+| **Autenticação embutida**                      | Não (precisa ser adicionada)             | Não (precisa integração externa)         | Sim, pronta para uso (JWT + RBAC)        | Sim, com integração a Identity Providers  |
+| **Mecanismo de autorização**                   | Roles, policies em SQL                   | Permissões detalhadas por role/campo     | Row-level security (RLS) com policies    | Configurável via YAML + middlewares       |
+| **Extensibilidade com código custom**          | Alta (via plugins e middleware)          | Moderada (webhooks e actions custom)     | Alta (Edge functions, serverless)        | Alta (wrappers, middlewares, composables) |
+| **Admin UI**                                   | Limitada (plugins ou pgAdmin)            | Sim, rica e interativa                   | Sim, painel completo                     | Sim (via WunderGraph Studio)              |
+| **Deploy local/self-hosted**                   | Sim                                       | Sim                                      | Sim                                      | Sim                                       |
+| **Melhor para...**                             | Desenvolvedores que preferem controle total| Apps reativas com GraphQL potente       | Backend completo pronto para uso         | Integração de múltiplas fontes em APIs    |
+| **Link oficial**                               | [postgraphile.org](https://www.postgraphile.org/) | [hasura.io](https://hasura.io/)      | [supabase.com](https://supabase.com/)    | [wundergraph.com](https://wundergraph.com/)|
