@@ -1,0 +1,30 @@
+[project]
+name = "pythonic-opensource-mds"
+version = "0.1.0"
+description = "Pythonic, 100% Open Source, Modern Data Stack"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests",
+]
+
+[project.optional-dependencies]
+[dependency-groups]
+dev = [
+  "pytest >=8.3.4"
+]
+lint = [
+    "ruff>=0.11.3",
+]
+
+[tool.uv]
+default-groups = ["dev", "lint"]
+
+[tool.uv.workspace]
+members = ["packages/*", "apache-airflow/dag/*", "api", "prefect-core"]
+exclude = []
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[tool.hatch.build.targets.wheel]
+packages = ["packages/*/src/*/"]
