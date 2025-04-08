@@ -1,5 +1,5 @@
 [project]
-name = "pythonic-opensource-mds"
+name = "pythonic_opensource_mds"
 version = "0.1.0"
 description = "Pythonic, 100% Open Source, Modern Data Stack"
 readme = "README.md"

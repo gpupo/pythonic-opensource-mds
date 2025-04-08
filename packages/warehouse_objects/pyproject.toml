@@ -1,0 +1,27 @@
+[project]
+name = "warehouse_objects"
+version = "0.1.0"
+description = "ORM, PEP 517 project structure"
+readme = "README.md"
+authors = [
+    { name = "gpupo", email = "g1mar@gpupo.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "sqlmodel>=0.0.24",
+]
+[dependency-groups]
+dev = [
+  "pytest >=8.3.4"
+]
+lint = [
+    "ruff>=0.11.3",
+]
+
+[tool.uv]
+default-groups = ["dev", "lint"]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
