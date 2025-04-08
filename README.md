@@ -47,3 +47,15 @@ TODO: escrever o roteiro de novas instalacoes
     cd ...
 
     git submodule update --init --recursive
+
+Copy the fake env vars
+
+    cp .env.example .env
+
+Pull the latest images
+
+    docker compose pull
+
+Start the services (in detached mode)
+
+    docker compose up -d
