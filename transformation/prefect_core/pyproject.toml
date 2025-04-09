@@ -1,0 +1,15 @@
+[project]
+name = "prefect-core"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "prefect>=3.3.3",
+    "tutorial-snakesay",
+    "warehouse-objects",
+]
+
+[tool.uv.sources]
+warehouse-objects = { workspace = true }
+tutorial-snakesay = { workspace = true }

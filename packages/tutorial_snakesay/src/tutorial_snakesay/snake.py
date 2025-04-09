@@ -1,0 +1,13 @@
+def say(message: str):
+    border = "_" * (len(message) + 2)
+    print(f" {border}")
+    print(f"( {message} )")
+    print(f" {border}")
+    print("  \\")
+    print("   \\    ___")
+    print("    \\  (o o)")
+    print("        \\_/ \\")
+    print("         λ \\ \\")
+    print("           _\\ \\_")
+    print("          (_____)_")
+    print("         (________)=Oo°")
