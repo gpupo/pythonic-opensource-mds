@@ -17,6 +17,8 @@ name: pythonic_os_mds
 
 services:
   studio:
+    # Studio (dashboard)
+    # https://github.com/supabase/supabase/tree/master/apps/studio
     container_name: supabase-studio
     image: supabase/studio:20250317-6955350
     restart: unless-stopped
@@ -58,6 +60,8 @@ services:
       # NEXT_ANALYTICS_BACKEND_PROVIDER: bigquery
 
   kong:
+    # Kong, API gateway, built on top of NGINX
+    # https://docs.konghq.com/
     container_name: supabase-kong
     image: kong:2.8.1
     restart: unless-stopped
@@ -88,6 +92,9 @@ services:
       kong docker-start'
 
   auth:
+    # GoTrue (Auth) A JWT-based API for managing users and issuing access tokens
+    # This integrates with PostgreSQL's Row Level Security and the API servers
+    # https://github.com/supabase/gotrue
     container_name: supabase-auth
     image: supabase/gotrue:v2.170.0
     restart: unless-stopped
@@ -171,6 +178,8 @@ services:
       # GOTRUE_HOOK_SEND_EMAIL_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
 
   rest:
+    # PostgREST web server that turns Postgres database directly into a RESTful API.
+    # https://github.com/PostgREST/postgrest
     container_name: supabase-rest
     image: postgrest/postgrest:v12.2.8
     restart: unless-stopped
@@ -191,7 +200,9 @@ services:
     command: ["postgrest"]
 
   realtime:
-    # This container name looks inconsistent but is correct because realtime constructs tenant id by parsing the subdomain
+    # A scalable WebSocket engine for managing user Presence, broadcasting messages, and streaming database changes.
+    # https://github.com/supabase/realtime
+    # WARN: This container name looks inconsistent but is correct because realtime constructs tenant id by parsing the subdomain
     container_name: realtime-dev.supabase-realtime
     image: supabase/realtime:v2.34.43
     restart: unless-stopped
@@ -235,8 +246,9 @@ services:
       SEED_SELF_HOST: true
       RUN_JANITOR: true
 
-  # To use S3 backed storage: docker compose -f docker-compose.yml -f docker-compose.s3.yml up
   storage:
+    # An S3-compatible object storage service that stores metadata in Postgres
+    # https://github.com/supabase/storage-api
     container_name: supabase-storage
     image: supabase/storage-api:v1.19.3
     restart: unless-stopped
@@ -314,6 +326,8 @@ services:
       PG_META_DB_USER: supabase_admin
       PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
 
+  # Deno (Edge Functions)
+  # https://deno.land/
   functions:
     container_name: supabase-edge-functions
     image: supabase/edge-runtime:v1.67.4
@@ -412,9 +426,6 @@ services:
     depends_on:
       vector:
         condition: service_healthy
-    ports:
-      - ${POSTGRES_STATIC_PORT}:${POSTGRES_STATIC_PORT}
-
     environment:
       POSTGRES_HOST: /var/run/postgresql
       PGPORT: ${POSTGRES_PORT}
@@ -459,9 +470,10 @@ services:
     security_opt:
       - "label=disable"
 
-  # Update the DATABASE_URL if you are using an external Postgres database
+  # Supavisor, multi-tenant Postgres connection pooler
+  # https://supabase.github.io/supavisor/
   supavisor:
-    container_name: supabase-pooler
+    container_name: postgres-connection-pooler
     image: supabase/supavisor:2.4.14
     restart: unless-stopped
     ports:

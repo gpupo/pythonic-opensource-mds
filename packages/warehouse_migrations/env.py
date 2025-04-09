@@ -1,27 +1,25 @@
 import os
 from logging.config import fileConfig
-from pathlib import Path
 
 from alembic import context
-from dotenv import load_dotenv
-from sqlalchemy import create_engine, engine_from_config, pool
+from infra_env import env
+from sqlalchemy import create_engine
 from warehouse_objects.org import *
 
-# Encontrar o caminho para o arquivo .env dois níveis acima
-base_dir = Path(__file__).parents[2]  # Sobe dois níveis a partir do diretório atual
-dotenv_path = base_dir / ".env"
-
-# Carregar variáveis do arquivo .env
-load_dotenv(dotenv_path)
+# Load environment variables if not running in a container
+if not env.is_running_in_container():
+    if not env.load_env():
+        raise RuntimeError("Could not load .env file for configuration")
 
 
 def get_url():
-    """Generate a URL from the environment variables."""
-    return "postgresql://%s:%s@%s:%s/%s" % (
+    """Generate a URL from the environment variables, Tenant ID mode."""
+    return "postgresql://%s.%s:%s@%s:%s/%s" % (
         os.environ["POSTGRES_USER"],
+        os.environ["POOLER_TENANT_ID"],
         os.environ["POSTGRES_PASSWORD"],
         os.environ["POSTGRES_STATIC_HOST"],
-        os.environ["POSTGRES_STATIC_PORT"],
+        os.environ["POSTGRES_PORT"],
         os.environ["POSTGRES_DB"],
     )
 
@@ -62,11 +60,8 @@ def run_migrations_offline() -> None:
 
     """
 
-    # url = config.get_main_option("sqlalchemy.url")
-    url = get_url()
-
     context.configure(
-        url=url,
+        url=get_url(),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -83,15 +78,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # connectable = engine_from_config(
-    #     config.get_section(config.config_ini_section, {}),
-    #     prefix="sqlalchemy.",
-    #     poolclass=pool.NullPool,
-    # )
-
-    url = get_url()
-    print(f"={url}")
-    connectable = create_engine(url)
+    connectable = create_engine(get_url())
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
 
