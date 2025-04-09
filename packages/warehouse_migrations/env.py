@@ -1,12 +1,35 @@
+import os
 from logging.config import fileConfig
+from pathlib import Path
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, engine_from_config, pool
 from warehouse_objects.org import *
+
+# Encontrar o caminho para o arquivo .env dois níveis acima
+base_dir = Path(__file__).parents[2]  # Sobe dois níveis a partir do diretório atual
+dotenv_path = base_dir / ".env"
+
+# Carregar variáveis do arquivo .env
+load_dotenv(dotenv_path)
+
+
+def get_url():
+    """Generate a URL from the environment variables."""
+    return "postgresql://%s:%s@%s:%s/%s" % (
+        os.environ["POSTGRES_USER"],
+        os.environ["POSTGRES_PASSWORD"],
+        os.environ["POSTGRES_STATIC_HOST"],
+        os.environ["POSTGRES_STATIC_PORT"],
+        os.environ["POSTGRES_DB"],
+    )
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -38,7 +61,10 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+
+    # url = config.get_main_option("sqlalchemy.url")
+    url = get_url()
+
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -57,12 +83,15 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # connectable = engine_from_config(
+    #     config.get_section(config.config_ini_section, {}),
+    #     prefix="sqlalchemy.",
+    #     poolclass=pool.NullPool,
+    # )
 
+    url = get_url()
+    print(f"={url}")
+    connectable = create_engine(url)
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
 

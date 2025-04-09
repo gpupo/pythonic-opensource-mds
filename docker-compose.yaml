@@ -375,10 +375,15 @@ services:
       # GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
       # GOOGLE_PROJECT_NUMBER: ${GOOGLE_PROJECT_NUMBER}
 
-  # Comment out everything below this point if you are using an external Postgres database
-  # TODO: Desassociar a DB do backend
+  # PostgreSQL database
+  # Official image: https://hub.docker.com/_/postgres
+  # NOTE: Supabase Unmodified Postgres with some useful plugins
+  #
+  # https://github.com/supabase/postgres
+  #
+  # Base de dados principal
   db:
-    container_name: supabase-db
+    container_name: postgres
     image: supabase/postgres:15.8.1.060
     restart: unless-stopped
     volumes:
@@ -407,6 +412,9 @@ services:
     depends_on:
       vector:
         condition: service_healthy
+    ports:
+      - ${POSTGRES_STATIC_PORT}:${POSTGRES_STATIC_PORT}
+
     environment:
       POSTGRES_HOST: /var/run/postgresql
       PGPORT: ${POSTGRES_PORT}
