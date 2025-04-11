@@ -1,0 +1,93 @@
+services:
+  mweb:
+    image: "marquezproject/marquez-web:${TAG:-latest}"
+    container_name: marquez-web
+    environment:
+      - MARQUEZ_HOST=mapi
+      - MARQUEZ_PORT=${API_PORT:-5000}
+      - WEB_PORT=${WEB_PORT:-3000}
+      - REACT_APP_ADVANCED_SEARCH=${SEARCH_ENABLED:-true}
+    ports:
+      - "${WEB_PORT:-3000}:${WEB_PORT:-3000}"
+    depends_on:
+      - mapi
+  mapi:
+    image: "marquezproject/marquez:${TAG:-latest}"
+    container_name: marquez-api
+    depends_on:
+      - db
+      - opensearch
+    ports:
+      - "${API_PORT:-5000}:${API_PORT:-5000}"
+      - "${API_ADMIN_PORT:-5001}:${API_ADMIN_PORT:-5001}"
+    environment:
+      # DB_HOST: ${POSTGRES_HOST}
+      # DB_PORT: ${POSTGRES_PORT}
+      # DB_USER: supabase_admin
+      # DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # DB_NAME: ${POSTGRES_DB}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB}
+      # TODO: Usar variaveis
+      - POSTGRES_USER=supabase_admin
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - OPENSEARCH_HOST=opensearch
+      - OPENSEARCH_PORT=${SEARCH_PORT:-9200}
+    entrypoint:
+      [
+        "/opt/marquez/wait-for-it.sh",
+        "db:${POSTGRES_PORT:-5432}",
+        "--",
+        "/opt/marquez/wait-for-it.sh",
+        "opensearch:${SEARCH_PORT:-9200}",
+        "--",
+        "./entrypoint.sh",
+      ]
+  seed_marquez:
+    image: "marquezproject/marquez:${TAG:-latest}"
+    # platform: linux/amd64
+    container_name: seed-marquez-with-metadata
+    environment:
+      - MARQUEZ_URL=http://mapi:${API_PORT:-5000}
+      - SEARCH_ENABLED=${SEARCH_ENABLED:-true}
+    volumes:
+      - ./ingestion/marquez/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+      - ./ingestion/marquez/docker/seed.sh:/usr/src/app/seed.sh
+      - ./ingestion/marquez/docker/metadata.template.json:/usr/src/app/metadata.template.json
+    links:
+      - "db:postgres"
+    depends_on:
+      - mapi
+    entrypoint:
+      ["./wait-for-it.sh", "api:${API_PORT:-5000}", "--timeout=120", "--", "./seed.sh"]
+  opensearch:
+    image: opensearchproject/opensearch:2.5.0
+    container_name: marquez-search
+    hostname: opensearch
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch
+      - discovery.seed_hosts=opensearch
+      - cluster.initial_cluster_manager_nodes=opensearch
+      - bootstrap.memory_lock=true
+      - plugins.security.ssl.http.enabled=false
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_PASSWORD=admin
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "${SEARCH_PORT:-9200}:9200"
+      - "9300:9300"
+volumes:
+  postgres-db-volume:
+  opensearch-data:
