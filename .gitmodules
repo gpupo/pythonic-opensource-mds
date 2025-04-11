@@ -1,3 +1,6 @@
 [submodule "backend/supabase"]
 	path = backend/supabase
 	url = https://github.com/supabase/supabase.git
+[submodule "ingestion/marquez"]
+	path = ingestion/marquez
+	url = https://github.com/MarquezProject/marquez.git
