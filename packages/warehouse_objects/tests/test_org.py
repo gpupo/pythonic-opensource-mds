@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import patch
 
-from warehouse_objects.org import Org, Product, Repository, RepositoryTag, Tag
+from warehouse_objects import Org, Product, Repository, RepositoryTag, Tag
 
 
 class TestOrg(unittest.TestCase):

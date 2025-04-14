@@ -1,5 +1,16 @@
 from backend_link.client import ClientContainer
+from typing import Optional
+from warehouse_objects import QueueMessage
 
+def _factory_queue_message(queue_name: str, message: dict) -> QueueMessage:
+    """Factory function to create a QueueMessage object"""
+    return QueueMessage(
+        queue_name=queue_name,
+        message=message,
+        enqueued_at=datetime.now(),
+        read_ct=0,
+        vt=None,
+    )
 
 class QueueContainer(ClientContainer):
     """Classe para acesso ao pgmq via Rest.
@@ -46,7 +57,7 @@ class QueueContainer(ClientContainer):
 
         return response.data
 
-    def read(self, queue_name: str, sleep_seconds: int = 0, limit: int = 10) -> list:
+    def read(self, queue_name: str, sleep_seconds: int = 0, limit: int = 10) -> list[QueueMessage]:
         """Lê mensagens sem removê-las da fila
 
         queue_name (text): Queue name
@@ -59,11 +70,11 @@ class QueueContainer(ClientContainer):
         )
 
         if not response.data:
-            raise Exception("Failed to read messages from queue")
+            return []
 
-        return response.data
+        return [QueueMessage(**message) for message in response.data]
 
-    def pop(self, queue_name: str) -> dict:
+    def pop(self, queue_name: str) -> Optional[QueueMessage]:
         """Recupera e remove a próxima mensagem disponível"""
         response = self.rpc_execute(
             "pop",
@@ -71,9 +82,9 @@ class QueueContainer(ClientContainer):
         )
 
         if not response.data:
-            raise Exception("Failed to pop message from queue")
+            return None
 
-        return response.data
+        return _factory_queue_message(queue_name, response.data[0])
 
     def archive(self, queue_name: str, message_id: int) -> dict:
         """Move uma mensagem para a tabela de arquivo"""
