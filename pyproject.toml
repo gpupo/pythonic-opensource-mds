@@ -5,6 +5,7 @@ description = "Pythonic, 100% Open Source, Modern Data Stack"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "icecream>=2.1.4",
     "psycopg2-binary>=2.9.10",
     "requests",
 ]
@@ -22,7 +23,7 @@ lint = [
 default-groups = ["dev", "lint"]
 
 [tool.uv.workspace]
-members = ["packages/*", "transformation/prefect_core"]
+members = ["packages/*", "orchestration"]
 exclude = []
 [build-system]
 requires = ["hatchling"]

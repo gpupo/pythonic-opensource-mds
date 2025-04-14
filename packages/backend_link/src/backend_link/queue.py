@@ -52,11 +52,16 @@ class QueueContainer(ClientContainer):
 
         return response.data
 
-    def read(self, queue_name: str, limit: int = 10) -> list:
-        """Lê mensagens sem removê-las da fila"""
+    def read(self, queue_name: str, sleep_seconds: int = 0, limit: int = 10) -> list:
+        """Lê mensagens sem removê-las da fila
+
+        queue_name (text): Queue name
+        sleep_seconds (integer): Visibility timeout in seconds
+        n (integer): Maximum number of Messages to read
+        """
         response = self.rpc_execute(
             "read",
-            {"queue_name": queue_name, "limit": limit},
+            {"queue_name": queue_name, "sleep_seconds": sleep_seconds, "n": limit},
         )
 
         if not response.data:

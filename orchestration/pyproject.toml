@@ -1,10 +1,12 @@
 [project]
-name = "prefect-core"
+name = "orchestration"
 version = "0.1.0"
-description = "Add your description here"
+description = "build, monitor, and scale critical data workflows"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "backend-link",
+    "icecream>=2.1.4",
     "infra-env",
     "numpy>=2.2.4",
     "openlineage-python>=1.31.0",
@@ -19,3 +21,4 @@ dependencies = [
 warehouse-objects = { workspace = true }
 tutorial-snakesay = { workspace = true }
 infra-env = { workspace = true }
+backend-link = { workspace = true }

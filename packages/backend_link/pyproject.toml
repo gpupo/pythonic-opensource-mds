@@ -8,13 +8,9 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "infra-env",
     "supabase>=2.15.0",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.uv.sources]
-infra-env = { workspace = true }

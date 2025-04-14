@@ -18,7 +18,9 @@ competitivos de negócio, transformando novamente a forma como as empresas **cri
 Este projeto tem o objetivo de fornecer uma estrutura abrangente para construir e
 compartilhar **dados** por toda a organização, para que possamos fazer coisas úteis e
 valiosas: melhor atendimento aos clientes, relatórios sem erros, **insights acionáveis**
-e a viabilização de processos verdadeiramente **orientados por dados**.
+e a viabilização de processos verdadeiramente **orientados por dados**, com foco em uma
+_Modern Data Stack_, enfatizando boas práticas para arquiteturas modernas de dados —
+como **Data Lakes**, **ELT**, **Data Warehouses**, **Data Mesh**, **Observabilidade**
 
 ---
 
@@ -143,6 +145,83 @@ Esses **blocos de dados** juntam-se aos pilares da modernidade tecnológica, com
 - **Infraestrutura como serviço (IaaS)**
 - **Integração contínua (CI)** e **entrega contínua (CD)**
 - Soluções de **monitoramento**
+
+---
+
+## Princípios para uma Modern Data Stack Sustentável
+
+---
+
+**1. Separação de responsabilidades**  
+Divida pipelines e camadas de dados por função: **ingestão**, **transformação**,
+**modelagem**, **consumo**. Isso facilita testes, reuso e evolução com menos atrito.
+
+---
+
+**2. Modularidade**  
+Tenha componentes bem definidos: **ELT como serviço**, **catálogos de dados
+desacoplados**, **módulos reutilizáveis de transformação** (ex: dbt models). Isso reduz
+a **complexidade acidental** e melhora a escalabilidade.
+
+---
+
+**3. Ciclos de feedback rápidos**  
+Automatize **testes de dados**, **validações de schema**, e **alertas proativos** com
+ferramentas como **Great Expectations**, **Monte Carlo**, **OpenTelemetry** e **logs
+estruturados**. Aprenda e ajuste antes que os usuários sintam o problema.
+
+---
+
+**4. Testes orientados ao uso**  
+Teste os **dados que importam**: regras de negócios, KPIs críticos e integridade em
+joins. Cobertura total é menos importante que testes **relevantes e eficazes**.
+
+---
+
+**5. Simplicidade com intenção**  
+Evite soluções genéricas demais. Um **modelo simples e claro** que atende ao caso de uso
+real é melhor do que um pipeline genérico, difícil de manter. **Exploração guiada por
+necessidade** é chave em domínios de dados complexos.
+
+---
+
+**6. Overengineering é dívida técnica disfarçada**  
+Adicionar múltiplas ferramentas, camadas ou abstrações sem uma razão clara **gera
+acúmulo de dívida técnica**.  
+**Dívida técnica**, no contexto de dados, é qualquer **comprometimento com soluções
+frágeis, mal documentadas ou difíceis de evoluir** que **aumentam o custo** de
+manutenção, aprendizado de novos membros, adaptação a novas demandas e auditorias de
+dados.
+
+---
+
+**7. Boas abstrações reduzem ruído, não clareza**  
+Crie **camadas de visualização e acesso aos dados** que ajudem os usuários a tomar
+decisões — sem esconder a lógica ou complexidade que importa. Más abstrações causam
+**falsas interpretações** e **confiança indevida nos dados**.
+
+---
+
+**8. Comunicação clara é infraestrutural**  
+**Data contracts**, **nomenclatura padrão**, **documentação acessível**, **commits
+explicativos** e **linha do tempo de transformações** são tão importantes quanto código
+ou queries. Promovem **confiança e colaboração entre times**.
+
+---
+
+**9. Pensamento em trade-offs é essencial**  
+Armazenar tudo em tempo real? Pode ser caro e desnecessário. Pré-agregar tudo? Pode
+perder flexibilidade.  
+**Engenheiros e arquitetos de dados maduros entendem o custo-benefício de cada decisão**
+e não buscam uma “solução única ideal”.
+
+---
+
+**10. Aprendizado contínuo como rotina**  
+O ecossistema de dados muda rápido. Times que **experimentam**, **testam novas
+ferramentas com critérios claros**, e se mantêm **curiosos**, criam soluções mais
+resilientes e adaptáveis. Não se trata de saber tudo, mas de saber **o que testar e o
+que priorizar**.
 
 ---
 
