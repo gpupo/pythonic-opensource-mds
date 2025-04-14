@@ -1,3 +1,5 @@
+import threading
+
 from supabase import Client as SupabaseClient
 from supabase import ClientOptions as ClientOptionsSupabase
 
@@ -20,6 +22,9 @@ class ClientContainer:
 
     def __init__(self, client: SupabaseClient):
         self.client: SupabaseClient = client
+
+    def to_serializable(self):
+        return {}
 
     def __getattr__(self, name):
         return getattr(self.client, name)

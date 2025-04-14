@@ -1,10 +1,4 @@
-from supabase import ClientOptions as ClientOptionsSupabase
-
 from backend_link.client import ClientContainer
-
-
-class ClientOptions(ClientOptionsSupabase):
-    pass
 
 
 class QueueContainer(ClientContainer):

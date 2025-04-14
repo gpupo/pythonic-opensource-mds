@@ -4,6 +4,7 @@ from supabase import create_client as create_client_supabase
 
 from .client import ClientContainer, ClientOptions
 from .queue import QueueContainer
+from .database import DatabaseContainer
 
 
 def create_client(
@@ -48,6 +49,15 @@ def create_options(schema: str = "public") -> ClientOptions:
     """
     return ClientOptions(schema=schema)
 
+def create_database_client(url: str, key: str):
+    """Factory para CLient especializado em Banco de Dados"""
+    return create_client(
+        url=url,
+        key=key,
+        options=create_options(),
+        target_class=DatabaseContainer,
+    )
+
 
 def create_queue_client(url: str, key: str):
     """Factory para CLient especializado em Filas"""
@@ -61,9 +71,11 @@ def create_queue_client(url: str, key: str):
 
 __all__ = (
     "create_client",
+    "create_database_client",
     "create_queue_client",
     "create_options",
     "ClientContainer",
+    "DatabaseContainer",
     "QueueContainer",
     "ClientOptions",
 )

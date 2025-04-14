@@ -1,20 +1,26 @@
 import os
 
-from backend_link import create_queue_client
+from backend_link import create_queue_client, create_database_client, DatabaseContainer, QueueContainer
 from infra_env import env
 
-# Verifique se o ambiente está configurado
-if not env.is_running_in_container():
-    if not env.load_env():
-        raise RuntimeError("Could not load .env file for configuration")
+# Verifica uma unica vez se o ambiente está configurado
+if not hasattr(env, "_initialized"):
+    if not env.is_running_in_container():
+        if not env.load_env():
+            raise RuntimeError("Could not load .env file for configuration")
+
+    env._initialized = True
 
 API_EXTERNAL_URL = os.environ["API_EXTERNAL_URL"]
 SERVICE_ROLE_KEY = os.environ["SERVICE_ROLE_KEY"]
 
-# Criação do objeto QueueContainer
-_queue_client = create_queue_client(url=API_EXTERNAL_URL, key=SERVICE_ROLE_KEY)
+def get_database_client() -> DatabaseContainer:
+    """Cria e retorna uma instância de DatabaseContainer."""
+    return create_database_client(url=API_EXTERNAL_URL, key=SERVICE_ROLE_KEY)
+
+def get_queue_client() -> QueueContainer:
+    """Cria e retorna uma instância de QueueContainer."""
+    return create_queue_client(url=API_EXTERNAL_URL, key=SERVICE_ROLE_KEY)
 
 
-def get_queue_client():
-    """Retorna a instância compartilhada de QueueContainer."""
-    return _queue_client
+__all__ = ["get_database_client", "get_queue_client"]
