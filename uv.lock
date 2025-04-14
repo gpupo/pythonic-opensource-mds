@@ -1004,7 +1004,7 @@ wheels = [
 [[package]]
 name = "orchestration"
 version = "0.1.0"
-source = { virtual = "orchestration" }
+source = { editable = "orchestration" }
 dependencies = [
     { name = "backend-link" },
     { name = "icecream" },
