@@ -1,16 +1,17 @@
-from backend_link.client import ClientContainer
-from typing import Optional
+import datetime
+from typing import Optional, Union, overload
+
 from warehouse_objects import QueueMessage
 
-def _factory_queue_message(queue_name: str, message: dict) -> QueueMessage:
+from backend_link.client import ClientContainer
+
+
+def _factory_queue_message(queue_name: str, message_data: dict) -> QueueMessage:
     """Factory function to create a QueueMessage object"""
-    return QueueMessage(
-        queue_name=queue_name,
-        message=message,
-        enqueued_at=datetime.now(),
-        read_ct=0,
-        vt=None,
-    )
+
+    message_data["queue_name"] = queue_name
+    return QueueMessage(**message_data)
+
 
 class QueueContainer(ClientContainer):
     """Classe para acesso ao pgmq via Rest.
@@ -57,7 +58,9 @@ class QueueContainer(ClientContainer):
 
         return response.data
 
-    def read(self, queue_name: str, sleep_seconds: int = 0, limit: int = 10) -> list[QueueMessage]:
+    def read(
+        self, queue_name: str, sleep_seconds: int = 0, limit: int = 10
+    ) -> list[QueueMessage]:
         """Lê mensagens sem removê-las da fila
 
         queue_name (text): Queue name
@@ -72,7 +75,9 @@ class QueueContainer(ClientContainer):
         if not response.data:
             return []
 
-        return [QueueMessage(**message) for message in response.data]
+        return [
+            _factory_queue_message(queue_name, message) for message in response.data
+        ]
 
     def pop(self, queue_name: str) -> Optional[QueueMessage]:
         """Recupera e remove a próxima mensagem disponível"""
@@ -86,17 +91,36 @@ class QueueContainer(ClientContainer):
 
         return _factory_queue_message(queue_name, response.data[0])
 
-    def archive(self, queue_name: str, message_id: int) -> dict:
-        """Move uma mensagem para a tabela de arquivo"""
+    @overload
+    def archive(self, message: QueueMessage) -> bool: ...
+
+    @overload
+    def archive(self, queue_name: str, message_id: int) -> bool: ...
+
+    def archive(
+        self, queue_or_message: Union[str, QueueMessage], message_id: int = None
+    ) -> bool:
+        """
+        Move uma mensagem para a tabela de arquivo.
+        """
+        if isinstance(queue_or_message, QueueMessage):
+            queue_name = queue_or_message.queue_name
+            msg_id = queue_or_message.msg_id
+        else:
+            queue_name = queue_or_message
+            msg_id = message_id
+            if msg_id is None:
+                raise ValueError("message_id must be provided when queue_name is used")
+
         response = self.rpc_execute(
             "archive",
-            {"queue_name": queue_name, "message_id": message_id},
+            {"queue_name": queue_name, "message_id": msg_id},
         )
 
         if not response.data:
             raise Exception("Failed to archive message in queue")
 
-        return response.data
+        return True
 
     def delete(self, queue_name: str, message_id: int) -> dict:
         """Exclui permanentemente uma mensagem"""
