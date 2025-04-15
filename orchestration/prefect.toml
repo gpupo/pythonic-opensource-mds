@@ -1,0 +1,10 @@
+# NOTE: https://docs.prefect.io/v3/api-ref/settings-ref
+
+[profiles]
+path="."
+[api]
+url='http://127.0.0.1:4200/api' 
+# Set more detailed logging while developing
+[logging]
+level = "DEBUG"
+log_prints="True"

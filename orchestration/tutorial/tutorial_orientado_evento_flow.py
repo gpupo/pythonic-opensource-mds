@@ -29,7 +29,7 @@ MAX_ITEMS = 5
 SECONDS_TO_WAIT = 0
 
 
-@task(cache_policy=NO_CACHE)
+@task(cache_policy=NO_CACHE, tags=["tutorial"])
 def scan_collector_producer_task(queue_client, repo_name, status):
     print("Simula tarefa geradora de eventos")
     response = queue_client.send(
@@ -41,7 +41,9 @@ def scan_collector_producer_task(queue_client, repo_name, status):
     print(f"Produced message on {QUEUE_NAME} for repo: {repo_name}")
 
 
-@task(retries=3, retry_delay_seconds=[1, 5, 10], cache_policy=NO_CACHE)
+@task(
+    retries=3, retry_delay_seconds=[1, 5, 10], cache_policy=NO_CACHE, tags=["tutorial"]
+)
 def scan_collector_consumer_pop_task(queue_client):
     """Simula o processamento de QueueMessage"""
     qm: QueueMessage = queue_client.pop(QUEUE_NAME)
@@ -54,7 +56,7 @@ def scan_collector_consumer_pop_task(queue_client):
     return True
 
 
-@task(cache_policy=NO_CACHE)
+@task(cache_policy=NO_CACHE, tags=["tutorial"])
 def scan_collector_consumer_read_archieve_task(queue_client):
     qm_list = queue_client.read(
         QUEUE_NAME, sleep_seconds=SECONDS_TO_WAIT, limit=MAX_ITEMS
