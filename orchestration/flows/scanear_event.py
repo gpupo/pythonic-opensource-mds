@@ -1,18 +1,23 @@
-""" Simula um evento de diretorio com repo https://github.com/apache/tvm preparado """
+"""Simula um evento de diretorio com repo https://github.com/apache/tvm preparado"""
+
+from icecream import ic
 from prefect.events import emit_event
 
 
 def publicar_evento():
-    emit_event(
+    e = emit_event(
         event="repository.prepared",
         resource={"prefect.resource.id": "my.external.resource"},
-        payload={"message": {
-            "repository": "tvm",
-            "path": "/tmp/pythonic-opensource-mds/apache/tvm",
-            "id": "apache-tvm",
-            "url":"https://github.com/apache/tvm",
-        }},
+        payload={
+            "message": {
+                "repository": "tvm",
+                "path": "/tmp/pythonic-opensource-mds/apache/tvm",
+                "id": "apache-tvm",
+                "url": "https://github.com/apache/tvm",
+            }
+        },
     )
+    ic(e)
 
 
 if __name__ == "__main__":

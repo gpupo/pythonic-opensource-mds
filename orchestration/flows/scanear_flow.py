@@ -2,9 +2,9 @@
 
 Requer criacao de work pool
 
-    uv run prefect work-pool create --type Process scanear-work-pool
+    uv run prefect work-pool create --type process local-process-work-pool
 
-    uv run prefect worker start --pool "scanear-work-pool"
+    uv run prefect worker start --pool "local-process-work-pool"
 
 Execute esse arquivo e dispare o evento em outro terminal
 
@@ -74,22 +74,24 @@ classDef task stroke:#0f0
 
 # ic.configureOutput(prefix="-> ", outputFunction=print)
 from icecream import ic
-from prefect import flow,serve
-from prefect.events import DeploymentEventTrigger
+from prefect import flow, serve, task
+from prefect.events import DeploymentEventTrigger, emit_event
 from utils.prefect import PARSE_EVENT_DATA_TEMPLATE, parse_event_data
-from prefect.events import emit_event
+
 
 @task(name="repository-enrich-task")
 def repository_enrich_task(repository_data):
     print(f"Visiting {repository_data.url}...")
-    emit_event(
+    e = emit_event(
         event="repository.tagged",
         resource={"prefect.resource.id": "my.external.resource"},
         payload={"message": repository_data},
     )
+    ic(e)
+
 
 @flow(name="repository-prepared-flow")
-def repository_prepared_flow(
+def flowA(
     info,
     id,
     occurred,
@@ -104,9 +106,11 @@ def repository_prepared_flow(
     )
     repository_enrich_task(event.message)
 
+
 @task(name="bandit-scan-task")
 def bandit_scan_task(repository_data):
     print(f"Access {repository_data.path}...")
+
 
 @task(name="pylint-scan-task")
 def pylint_scan_task(repository_data):
@@ -114,7 +118,7 @@ def pylint_scan_task(repository_data):
 
 
 @flow(name="repository-scanner-flow")
-def repository_scanner_flow(
+def flowB(
     info,
     id,
     occurred,
@@ -130,20 +134,26 @@ def repository_scanner_flow(
     bandit_scan_task(event.message)
     pylint_scan_task(event.message)
 
+
 if __name__ == "__main__":
 
-    
-    repository_prepared_deploy = repository_prepared_flow.to_deployment(
-        name="repository-prepared-deployment",
-        parameters={"info": {"automation": "trigger"}},
-        triggers=[
-            DeploymentEventTrigger(
-                enabled=True,
-                match={"prefect.resource.id": "my.external.resource"},
-                expect=["repository.prepared"],
-                parameters=PARSE_EVENT_DATA_TEMPLATE,
-            )
-        ],
-    )
+    def generic_factory_deploy(o, name: str, expected: str):
+        return o.to_deployment(
+            name=name,
+            parameters={"info": {"automation": "trigger"}},
+            triggers=[
+                DeploymentEventTrigger(
+                    enabled=True,
+                    match={"prefect.resource.id": "my.external.resource"},
+                    expect=[expected],
+                    parameters=PARSE_EVENT_DATA_TEMPLATE,
+                )
+            ],
+        )
 
-    serve(repository_prepared_deploy)
+    deployA = generic_factory_deploy(
+        flowA,
+        "repository-prepared-deployment",
+        "repository-prepared",
+    )
+    serve(deployA)
