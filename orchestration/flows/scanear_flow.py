@@ -42,20 +42,20 @@ event1([repository.prepared]):::event
 event2([repository.tagged]):::event
 
 
-%% Deployment
+%% Deployment A
 subgraph repository-prepared-deployment
     flowA[repository-prepared-flow]
     flowA --> repository-enrich-task:::task--> event2
 end
 
-%% Deployment
+%% Deployment B
 subgraph repository-scanner-deployment
     flowB[repository-scanner-flow]
     flowB --> bandit-scan-task:::task
     flowB --> pylint-scan-task:::task
 end
 
-%% Deployment
+%% Deployment C
 subgraph repository-tagged-analyzer
     flowC[repository-tagged-analysis-flow]
     taskC[analyze-git-statistics-task]:::task
@@ -137,23 +137,34 @@ def flowB(
 
 if __name__ == "__main__":
 
-    def generic_factory_deploy(o, name: str, expected: str):
-        return o.to_deployment(
+    def create_event_deployment(flow, name: str, expected_event: str):
+        """Factory function to create event-triggered deployments.
+
+        NOTE: https://reference.prefect.io/prefect/flows/#prefect.flows.Flow.to_deployment
+
+        """
+        return flow.to_deployment(
             name=name,
             parameters={"info": {"automation": "trigger"}},
             triggers=[
                 DeploymentEventTrigger(
                     enabled=True,
                     match={"prefect.resource.id": "my.external.resource"},
-                    expect=[expected],
+                    expect=[expected_event],
                     parameters=PARSE_EVENT_DATA_TEMPLATE,
                 )
             ],
         )
 
-    deployA = generic_factory_deploy(
+    deploymentA = create_event_deployment(
         flowA,
         "repository-prepared-deployment",
-        "repository-prepared",
+        "repository.prepared",
     )
-    serve(deployA)
+    deploymentB = create_event_deployment(
+        flowB,
+        "repository-scanner-deployment",
+        "repository.tagged",
+    )
+
+    serve(deploymentA, deploymentB)
