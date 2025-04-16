@@ -73,21 +73,45 @@ classDef task stroke:#0f0
 """
 
 # ic.configureOutput(prefix="-> ", outputFunction=print)
+from typing import Any
+
 from icecream import ic
 from prefect import flow, serve, task
 from prefect.events import DeploymentEventTrigger, emit_event
+from prefect.logging import get_run_logger
+from pydantic import BaseModel
 from utils.prefect import PARSE_EVENT_DATA_TEMPLATE, parse_event_data
 
 
+class RepositoryData(BaseModel):
+    """Flexible repository data container that accepts any fields.
+
+    factory from a dict like {
+          "reposit
+          "path":
+          "id": "a
+          "url": "
+      }
+    """
+
+    class Config:
+        extra = "allow"  # Allows any additional fields
+
+
+def repository_parse_message(message) -> RepositoryData:
+    return RepositoryData(**message)
+
+
 @task(name="repository-enrich-task")
-def repository_enrich_task(repository_data):
-    print(f"Visiting {repository_data.url}...")
+def repository_enrich_task(rd: RepositoryData):
+    print(f"Visiting {rd.url}...")
     e = emit_event(
         event="repository.tagged",
         resource={"prefect.resource.id": "my.external.resource"},
-        payload={"message": repository_data},
+        payload={"message": rd},
     )
-    ic(e)
+    logger = get_run_logger()
+    logger.info(e)
 
 
 @flow(name="repository-prepared-flow")
@@ -104,17 +128,19 @@ def flowA(
         payload=payload,
         id=id,
     )
-    repository_enrich_task(event.message)
+
+    rd = repository_parse_message(event.message)
+    repository_enrich_task(rd)
 
 
 @task(name="bandit-scan-task")
-def bandit_scan_task(repository_data):
-    print(f"Access {repository_data.path}...")
+def bandit_scan_task(rd: RepositoryData):
+    print(f"Access {rd.path}...")
 
 
 @task(name="pylint-scan-task")
-def pylint_scan_task(repository_data):
-    print(f"Access {repository_data.path}...")
+def pylint_scan_task(rd: RepositoryData):
+    print(f"Access {rd.path}...")
 
 
 @flow(name="repository-scanner-flow")
@@ -131,8 +157,9 @@ def flowB(
         payload=payload,
         id=id,
     )
-    bandit_scan_task(event.message)
-    pylint_scan_task(event.message)
+    rd = repository_parse_message(event.message)
+    bandit_scan_task(rd)
+    pylint_scan_task(rd)
 
 
 if __name__ == "__main__":
