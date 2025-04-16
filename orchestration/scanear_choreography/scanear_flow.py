@@ -28,7 +28,6 @@ def scanear_flow(
     payload,
 ):
     event = parse_event_data(
-        deployment=deployment_parameters,
         occurred=occurred,
         event=event,
         payload=payload,

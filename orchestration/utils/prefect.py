@@ -30,11 +30,18 @@ class PrefectEvent(BaseModel):
     resource: Optional[Any] = None
     related: List[Any] = []
     payload: Dict[str, Any]
-    id: UUID
+    id: Optional[UUID] = None
     follows: Optional[UUID] = None
     received: Optional[datetime] = None
     deployment: Optional[Any] = None
 
     @computed_field
-    def message(self) -> dict:
-        return self.payload["message"]
+    def message(self) -> Optional[Dict[str, Any]]:
+        """
+        Retorna a mensagem contida no payload, se existir.
+        Caso contrário, retorna None.
+        """
+        try:
+            return self.payload.get("message", {})
+        except (AttributeError, KeyError, TypeError):
+            return None
