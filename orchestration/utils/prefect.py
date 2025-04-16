@@ -5,6 +5,13 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, computed_field
 
+PARSE_EVENT_DATA_TEMPLATE = {
+    "id": "{{ event.id }}",
+    "occurred": "{{ event.occurred }}",
+    "event": "{{ event.event }}",
+    "payload": "{{ event.payload }}",
+}
+
 
 def parse_event_data(**kwargs):
     occurred = kwargs.get("occurred")
