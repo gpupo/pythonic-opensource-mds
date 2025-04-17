@@ -1,0 +1,39 @@
+data:
+  repository:
+    id: "MDEwOlJlcG9zaXRvcnk3MDc0NjQ4NA=="
+    name: "tvm"
+    isMirror: false
+    isPrivate: false
+    isSecurityPolicyEnabled: true
+    stargazerCount: 12212
+    forkCount: 3562
+    refs:
+      - name: "nightly"
+        target:
+          committedDate: "2025-04-14T09:52:30Z"
+          message:
+            "[Relax][PyTorch] full.default, full_like.default, ones.default (#17832)"
+    pullRequests:
+      - title: "[Relax][PyTorch] Add Logaddexp op support for exported program"
+        mergedAt: "2025-04-17T07:23:16Z"
+        mergedBy:
+          login: "Hzfengsy"
+    defaultBranchRef:
+      name: "main"
+      target:
+        history:
+          - message:
+              "[Relax][PyTorch] Add Logaddexp op support for exported program (#17803)"
+            committedDate: "2025-04-17T07:23:16Z"
+            author:
+              name: "AishwaryaElango"
+    product:
+      id: 1
+      name: "mml"
+      description:
+        "Machine Learning Infrastructure and Libraries under the Apache Foundation"
+      org:
+        id: 2
+        login: "apache"
+        name: "Apache Software Foundation"
+        url: "https://github.com/apache"
