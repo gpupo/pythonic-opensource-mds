@@ -34,17 +34,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-
 target_metadata = SQLModel.metadata
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline() -> None:
@@ -71,6 +61,21 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def include_object(object, name, type_, reflected, compare_to):
+    """Ignora qualquer tabela do schema auth"""
+    if type_ == "table" and object.schema == "auth":
+        return False
+    return True
+
+
+def render_item_with_comments(type_, obj, autogen_context):
+    """Para que o alembic revision autogenerate gere as descrições."""
+    if type_ == "column" and obj.comment:
+        autogen_context.imports.add("from sqlalchemy import Column")
+        return f"sa.Column({repr(obj.type)}, comment={repr(obj.comment)})"
+    return False
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -80,7 +85,16 @@ def run_migrations_online() -> None:
     """
     connectable = create_engine(get_url())
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default=True,
+            include_object=include_object,
+            **{
+                "render_item": render_item_with_comments
+            },  # esta linha ativa os comentários
+        )
 
         with context.begin_transaction():
             context.run_migrations()

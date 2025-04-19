@@ -44,6 +44,17 @@ class TagCollection:
         return marks
 
 
+class ProfileOrgLink(SQLModel, table=True):
+    """Tabela de associação."""
+
+    profile_id: uuid.UUID = Field(
+        foreign_key="profile.id", primary_key=True, description="ID do perfil"
+    )
+    org_id: int = Field(
+        foreign_key="org.id", primary_key=True, description="ID da organização"
+    )
+
+
 class Org(SQLModel, table=True):
     """Tabela que representa uma organização."""
 
@@ -63,7 +74,32 @@ class Org(SQLModel, table=True):
         default=None, description="Data de revogação da organização."
     )
     products: List["Product"] = Relationship(back_populates="org")
-    profiles: List["ProfileOrgAccess"] = Relationship(back_populates="org")
+    profiles: List["Profile"] = Relationship(
+        back_populates="orgs", link_model=ProfileOrgLink
+    )
+
+
+class User(SQLModel, table=True):
+    """Representa tabela maior do schema auth."""
+
+    __tablename__ = "users"
+    __table_args__ = {"schema": "auth"}  # Especifica o schema
+
+    id: int = Field(primary_key=True, description="ID do usuário")
+    username: str = Field(description="Nome do usuário")
+    email: str = Field(description="E-mail do usuário")
+    role: str = Field(description="Papel")
+
+
+class Profile(SQLModel, table=True):
+    """Tabela atualizada por trigger no login.
+    INFO: https://supabase.com/docs/guides/auth/managing-user-data
+    """
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="auth.users.id")
+    name: Optional[str] = None
+    orgs: List[Org] = Relationship(back_populates="profiles", link_model=ProfileOrgLink)
 
 
 class Product(SQLModel, table=True):
@@ -173,21 +209,3 @@ class DefaultConfig(SQLModel, table=True):
         default={},
         sa_column=Column(JSON),
     )
-
-
-class Profile(SQLModel, table=True):
-    __tablename__ = "profiles"
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="auth.users.id")
-    name: Optional[str] = None
-
-    orgs: List["ProfileOrgAccess"] = Relationship(back_populates="profile")
-
-
-class ProfileOrgAccess(SQLModel, table=True):
-    __tablename__ = "profile_org_access"
-    profile_id: uuid.UUID = Field(foreign_key="profiles.id", primary_key=True)
-    org_id: uuid.UUID = Field(foreign_key="orgs.id", primary_key=True)
-
-    profile: Profile = Relationship(back_populates="orgs")
-    org: Org = Relationship(back_populates="profiles")
