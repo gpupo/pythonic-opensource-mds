@@ -1,2 +1,85 @@
-packages/warehouse_migrations/test.db
-.env
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+**/.Python
+**/build/
+**/develop-eggs/
+**/dist/
+**/downloads/
+**/eggs/
+**/.eggs/
+**/lib/
+**/lib64/
+**/parts/
+**/sdist/
+**/var/
+**/wheels/
+**/share/python-wheels/
+**/*.egg-info/
+**/.installed.cfg
+**/*.egg
+**/MANIFEST
+**/__pypackages__/
+
+# Installer logs
+**/pip-log.txt
+**/pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+**/htmlcov/
+**/.tox/
+**/.nox/
+**/.coverage
+**/.coverage.*
+**/.*cache
+**/nosetests.xml
+**/coverage.xml
+**/*.cover
+**/*.py,cover
+**/.hypothesis/
+**/.pytest_cache/
+**/cover/
+
+
+# Svelte
+test-results
+node_modules
+
+# Output
+**/.output
+**/.vercel
+**/.netlify
+**/.wrangler
+**/.svelte-kit
+**/build
+
+# OS
+**/Thumbs.db
+**/.DS_Store
+
+# IDE
+.idea
+.vscode
+
+
+# Env
+**/.env
+**/.env.*
+**/!.env.example
+**/!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+*storybook.log
+
+# Paraglide
+**/src/lib/paraglide
+
+# SQLite
+*.db
+**/cache/plugins

@@ -2,20 +2,23 @@ import unittest
 from datetime import datetime
 from unittest.mock import patch
 
-from warehouse_objects import Org, Product, Repository, RepositoryTag, Tag
+from warehouse_objects.org import Org, Product, Repository, RepositoryTag
 
 
 class TestOrg(unittest.TestCase):
     def setUp(self):
         self.org = Org(
+            id=1,
             name="TestOrg",
             url="http://test.org",
             image="test.jpg",
             products=[
                 Product(
+                    id=1,
                     name="TestProduct",
                     repositories=[
                         Repository(
+                            id=1,
                             name="TestRepo",
                             description="TestRepoDescription",
                             url="http://test.repo",
