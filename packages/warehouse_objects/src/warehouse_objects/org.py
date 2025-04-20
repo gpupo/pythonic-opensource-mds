@@ -2,11 +2,29 @@ import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 
-from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+from sqlmodel import JSON, Column, Relationship, SQLModel
+from sqlmodel import Field as SuperField
+
+
+def Field(*args, **kwargs) -> Any:
+    description = kwargs.get("description")
+    if not description:
+        return SuperField(*args, **kwargs)
+
+    if "sa_column" not in kwargs and "sa_column_kwargs" not in kwargs:
+        kwargs["sa_column_kwargs"] = {"comment": description}
+
+    field = SuperField(*args, **kwargs)
+    if "sa_column" in kwargs:
+        field.sa_column.comment = description
+
+    return field
 
 
 class Tag(SQLModel, table=True):
     """Tabela que armazena tags associadas a repositórios."""
+
+    __table_args__ = {"comment": "Tabela de tags do sistema"}
 
     id: str = Field(primary_key=True, description="Identificador único da tag.")
     type: str = Field(description="Tipo da tag.")
@@ -47,6 +65,8 @@ class TagCollection:
 class ProfileOrgLink(SQLModel, table=True):
     """Tabela de associação."""
 
+    __table_args__ = {"comment": "Table pivot"}
+
     profile_id: uuid.UUID = Field(
         foreign_key="profile.id", primary_key=True, description="ID do perfil"
     )
@@ -56,7 +76,9 @@ class ProfileOrgLink(SQLModel, table=True):
 
 
 class Org(SQLModel, table=True):
-    """Tabela que representa uma organização."""
+    """Organization."""
+
+    __table_args__ = {"comment": "Tabela que representa uma organização."}
 
     id: int | None = Field(
         default=None, primary_key=True, description="ID único da organização."
@@ -69,6 +91,9 @@ class Org(SQLModel, table=True):
     )
     description: Optional[str] = Field(
         default=None, description="Descrição da organização."
+    )
+    is_public: bool = Field(
+        default=False, description="Define se a visibilidade é pública."
     )
     revoked_at: Optional[datetime] = Field(
         default=None, description="Data de revogação da organização."
@@ -83,7 +108,7 @@ class User(SQLModel, table=True):
     """Representa tabela maior do schema auth."""
 
     __tablename__ = "users"
-    __table_args__ = {"schema": "auth"}  # Especifica o schema
+    __table_args__ = {"schema": "auth"}
 
     id: int = Field(primary_key=True, description="ID do usuário")
     username: str = Field(description="Nome do usuário")
@@ -96,6 +121,8 @@ class Profile(SQLModel, table=True):
     INFO: https://supabase.com/docs/guides/auth/managing-user-data
     """
 
+    __table_args__ = {"comment": "Perfil de usuarios"}
+
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="auth.users.id")
     name: Optional[str] = None
@@ -104,6 +131,8 @@ class Profile(SQLModel, table=True):
 
 class Product(SQLModel, table=True):
     """Tabela que representa um produto."""
+
+    __table_args__ = {"comment": "Produto de Software que aninha componentes"}
 
     id: int | None = Field(
         default=None, primary_key=True, description="ID único do produto."
@@ -115,6 +144,9 @@ class Product(SQLModel, table=True):
     description: Optional[str] = Field(
         default=None, description="Descrição do produto."
     )
+    is_public: bool = Field(
+        default=False, description="Define se a visibilidade é pública."
+    )
     revoked_at: Optional[datetime] = Field(
         default=None, description="Data de revogação do produto."
     )
@@ -124,6 +156,8 @@ class Product(SQLModel, table=True):
 
 class Repository(SQLModel, table=True):
     """Tabela que representa um repositório git de um componente do produto."""
+
+    __table_args__ = {"comment": "Repo Git-Based de um componente"}
 
     id: int | None = Field(
         default=None, primary_key=True, description="ID único do repositório."
@@ -136,6 +170,9 @@ class Repository(SQLModel, table=True):
         default=None, description="Descrição do repositório."
     )
     url: Optional[str] = Field(default=None, description="URL do repositório.")
+    is_public: bool = Field(
+        default=False, description="Define se a visibilidade é pública."
+    )
     branch_production: Optional[str] = Field(
         default=None, description="Branch de produção do repositório."
     )
@@ -146,6 +183,8 @@ class Repository(SQLModel, table=True):
 
 class RepositoryTag(SQLModel, table=True):
     """Tabela que armazena o SHA1 do commit do repositório para cada tag existente."""
+
+    __table_args__ = {"comment": "Tags sobre commits do repo git-based"}
 
     id: str = Field(
         primary_key=True, description="Identificador único da tag do repositório."
@@ -162,6 +201,8 @@ class RepositoryTag(SQLModel, table=True):
 
 class RepositoryConfig(SQLModel, table=True):
     """Tabela que representa configurações associadas a um repositório."""
+
+    __table_args__ = {"comment": "Conjunto de Configs especializadas do Repo"}
 
     id: int | None = Field(
         default=None,
@@ -198,7 +239,9 @@ class RepositoryConfig(SQLModel, table=True):
 
 
 class DefaultConfig(SQLModel, table=True):
-    """Tabela que representa configurações padrão usadas na ausência de configurações específicas."""
+    __table_args__ = {
+        "comment": "Configurações padrão usadas na ausência de configurações específicas"
+    }
 
     id: int | None = Field(
         default=None, primary_key=True, description="ID único da configuração padrão."
@@ -208,4 +251,5 @@ class DefaultConfig(SQLModel, table=True):
     value: Optional[dict] = Field(
         default={},
         sa_column=Column(JSON),
+        description="Valor padrão da configuração.",
     )
