@@ -1,73 +1,75 @@
 import unittest
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock
+from uuid import uuid4
 
-from warehouse_objects.org import Org, Product, Repository, RepositoryTag
+from warehouse_objects.sqlmodel import Session
+from warehouse_objects.org import (
+    DefaultConfig,
+    Field,
+    Org,
+    Product,
+    Profile,
+    ProfileOrgLink,
+    Repository,
+    RepositoryConfig,
+    RepositoryTag,
+    Tag,
+    TagCollection,
+    User,
+)
+
+class TestTag(unittest.TestCase):
+    def test_tag_initialization(self):
+        tag = Tag(type="Y", year=2025, number=1)
+        self.assertEqual(tag.id, "2025_Y")
+
+
+class TestTagCollection(unittest.TestCase):
+    def test_find_by_type_and_timerange(self):
+        session = MagicMock()
+        collection = TagCollection(session)
+        collection.find_by_type_and_timerange(
+            "test", datetime(2025, 1, 1), datetime(2025, 12, 31)
+        )
+        session.query.assert_called()
 
 
 class TestOrg(unittest.TestCase):
-    def setUp(self):
-        self.org = Org(
-            id=1,
-            name="TestOrg",
-            url="http://test.org",
-            image="test.jpg",
-            products=[
-                Product(
-                    id=1,
-                    name="TestProduct",
-                    repositories=[
-                        Repository(
-                            id=1,
-                            name="TestRepo",
-                            description="TestRepoDescription",
-                            url="http://test.repo",
-                            branch_production="main",
-                            tags=[
-                                RepositoryTag(
-                                    id="TestTag",
-                                    sha1="sha1",
-                                    type="Y",
-                                    start_date="2024-01-01T00:00:00",
-                                    end_date="2024-12-31T23:59:59",
-                                )
-                            ],
-                        )
-                    ],
-                )
-            ],
+    def test_org_creation(self):
+        org = Org(id=1, login="example", name="Example Org", is_public=True)
+        self.assertEqual(org.login, "example")
+
+
+class TestProfileOrgLink(unittest.TestCase):
+    def test_profile_org_link(self):
+        link = ProfileOrgLink(profile_id=uuid4(), org_id=1)
+        self.assertIsNotNone(link.profile_id)
+
+
+class TestUser(unittest.TestCase):
+    def test_user_creation(self):
+        user = User(id=1, username="testuser", email="test@example.com", role="admin")
+        self.assertEqual(user.username, "testuser")
+
+
+class TestRepositoryConfig(unittest.TestCase):
+    def test_get_config(self):
+        session = MagicMock()
+        default_config = DefaultConfig(name="test_key", value={"key": "value"})
+        session.query.return_value.filter.return_value.first.return_value = (
+            default_config
         )
 
-    def test_org_name(self):
-        self.assertEqual(self.org.name, "TestOrg")
+        config = RepositoryConfig(spec={"test_key": "value"})
+        value = config.get_config("test_key", session)
+        self.assertEqual(value, "value")
 
-    def test_org_url(self):
-        self.assertEqual(self.org.url, "http://test.org")
+    def test_set_config(self):
+        config = RepositoryConfig()
+        config.set_config("test_key", "value")
+        self.assertEqual(config.spec["test_key"], "value")
 
-    def test_org_image(self):
-        self.assertEqual(self.org.image, "test.jpg")
 
-    def test_product_name(self):
-        self.assertEqual(self.org.products[0].name, "TestProduct")
-
-    def test_repository_name(self):
-        self.assertEqual(self.org.products[0].repositories[0].name, "TestRepo")
-
-    def test_repository_description(self):
-        self.assertEqual(
-            self.org.products[0].repositories[0].description, "TestRepoDescription"
-        )
-
-    def test_repository_url(self):
-        self.assertEqual(self.org.products[0].repositories[0].url, "http://test.repo")
-
-    def test_repository_branch_production(self):
-        self.assertEqual(self.org.products[0].repositories[0].branch_production, "main")
-
-    def test_repository_tag(self):
-        tag = self.org.products[0].repositories[0].tags[0]
-        self.assertEqual(tag.id, "TestTag")
-        self.assertEqual(tag.type, "Y")
-        # test if the strings start_date and end_date are in datetime strlen
-        self.assertEqual(len(tag.start_date), 19)
-        self.assertEqual(len(tag.end_date), 19)
+if __name__ == "__main__":
+    unittest.main()

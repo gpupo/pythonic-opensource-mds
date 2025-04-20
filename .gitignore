@@ -63,7 +63,7 @@ node_modules
 # IDE
 .idea
 .vscode
-
+*.code-workspace
 
 # Env
 **/.env
