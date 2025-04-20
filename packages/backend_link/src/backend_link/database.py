@@ -54,7 +54,7 @@ class DatabaseContainer(ClientContainer):
         return model_class(**response.data[0])
 
     def hydrate_list(
-        self, model_class: SQLModel, args: Optional[Dict[str, Any]]
+        self, model_class: SQLModel, args: Optional[Dict[str, Any]] = {}
     ) -> List[SQLModel]:
         """Executa o select com as condições de filtro"""
 
